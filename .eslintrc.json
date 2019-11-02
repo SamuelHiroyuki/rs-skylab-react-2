@@ -19,10 +19,13 @@
 	"plugins": ["react", "prettier"],
 	"rules": {
 		"prettier/prettier": "error",
-		"react/jsx-filename-extension": [
-			"warn",
-			{ "extensions": [".jsx", ".js"] }
-		],
-		"import/prefer-default-export": "off"
+		"react/jsx-filename-extension": ["warn", { "extensions": [".jsx", ".js"] }],
+		"import/prefer-default-export": "off",
+		"linebreak-style": 0,
+		"eslint linebreak-style": [0, "error", "windows"],
+		"no-tabs": 0,
+		"indent": [2, "tab"],
+		"no-param-reassign": "off",
+		"no-unused-vars": ["warn", { "argsIgnorePattern": "next" }]
 	}
 }
