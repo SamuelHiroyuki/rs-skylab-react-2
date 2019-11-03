@@ -27,6 +27,7 @@
 		"indent": [2, "tab"],
 		"no-param-reassign": "off",
 		"react/state-in-constructor": "off",
+		"react/static-property-placement": "off",
 		"no-unused-vars": ["warn", { "argsIgnorePattern": "next" }]
 	}
 }
