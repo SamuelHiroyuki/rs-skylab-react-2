@@ -3,15 +3,25 @@ import styled, { keyframes, css } from 'styled-components';
 export const Form = styled.form`
 	margin-top: 30px;
 	display: flex;
+	flex-direction: column;
 
-	input {
-		padding: 10px 15px;
-		border-radius: 4px;
-		font-size: 16px;
+	div {
+		display: flex;
 
-		border: 1px solid #eee;
+		input {
+			padding: 10px 15px;
+			border-radius: 4px;
+			font-size: 16px;
 
-		flex: 1;
+			border: 1px solid ${({ error }) => (error ? '#f00' : '#eee')};
+
+			flex: 1;
+		}
+	}
+
+	span {
+		font-size: 12px;
+		color: #f00;
 	}
 `;
 

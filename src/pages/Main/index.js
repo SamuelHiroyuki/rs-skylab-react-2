@@ -12,6 +12,8 @@ export default class Main extends Component {
 		newRepo: '',
 		repositories: [],
 		loading: false,
+		error: false,
+		errorMessage: '',
 	};
 
 	componentDidMount() {
@@ -45,22 +47,42 @@ export default class Main extends Component {
 		this.setState({ loading: true });
 
 		const { newRepo, repositories } = this.state;
+		try {
+			if (!newRepo) throw new Error('Informe um repositório!');
 
-		const response = await getRepository(newRepo);
+			const exists = repositories.find(
+				r => r.name.toLowerCase() === newRepo.toLowerCase()
+			);
 
-		const data = {
-			name: response.data.full_name,
-		};
+			if (exists) throw new Error('O repositório já foi adicionado!');
 
-		this.setState({
-			repositories: [...repositories, data],
-			newRepo: '',
-			loading: false,
-		});
+			try {
+				const response = await getRepository(newRepo);
+				const data = {
+					name: response.data.full_name,
+				};
+
+				this.setState({
+					repositories: [...repositories, data],
+					newRepo: '',
+					loading: false,
+					error: false,
+				});
+			} catch (error) {
+				this.setState({
+					error: true,
+					errorMessage: 'O repositório informado não existe!',
+				});
+			}
+		} catch (error) {
+			this.setState({ error: true, errorMessage: error.message });
+		} finally {
+			this.setState({ loading: false });
+		}
 	};
 
 	render() {
-		const { newRepo, loading, repositories } = this.state;
+		const { newRepo, loading, repositories, error, errorMessage } = this.state;
 
 		return (
 			<Container>
@@ -68,21 +90,24 @@ export default class Main extends Component {
 					<FaGithubAlt /> Repositórios
 				</h1>
 
-				<Form onSubmit={this.handleSubmit}>
-					<input
-						value={newRepo}
-						placeholder="Adicionar repositório"
-						type="text"
-						onChange={this.handleInputChange}
-					/>
+				<Form onSubmit={this.handleSubmit} error={error}>
+					<div>
+						<input
+							value={newRepo}
+							placeholder="Adicionar repositório"
+							type="text"
+							onChange={this.handleInputChange}
+						/>
 
-					<SubmitButton loading={loading ? 1 : 0}>
-						{loading ? (
-							<FaSpinner color="#fff" size={14} />
-						) : (
-							<FaPlus color="#fff" size={14} />
-						)}
-					</SubmitButton>
+						<SubmitButton loading={loading ? 1 : 0}>
+							{loading ? (
+								<FaSpinner color="#fff" size={14} />
+							) : (
+								<FaPlus color="#fff" size={14} />
+							)}
+						</SubmitButton>
+					</div>
+					{error && <span>{errorMessage}</span>}
 				</Form>
 
 				<List>
