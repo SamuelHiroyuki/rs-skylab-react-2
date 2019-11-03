@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FaSpinner, FaChevronCircleLeft } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 import {
 	getRepository,
 	getRepositoryIssues,
 } from '../../services/api/Repositories';
+import Container from '../../components/Container';
 
-// import { Container } from './styles';
+import { Loading, Owner, IssuesList } from './styles';
 
 export default class Repository extends Component {
 	static propTypes = {
@@ -48,6 +51,46 @@ export default class Repository extends Component {
 		const { match } = this.props;
 		const { repository, issues, loading } = this.state;
 
-		return <h1>Repository: {decodeURIComponent(match.params.repository)}</h1>;
+		if (loading) {
+			return (
+				<Loading>
+					Carregando
+					<FaSpinner color="#fff" size={22} />
+				</Loading>
+			);
+		}
+
+		return (
+			<Container>
+				<Owner>
+					<Link to="/">
+						<FaChevronCircleLeft color="#333" size={18} />
+					</Link>
+					<img src={repository.owner.avatar_url} alt={repository.owner.login} />
+					<h1>{repository.name}</h1>
+					<p>{repository.description}</p>
+				</Owner>
+
+				<IssuesList>
+					{issues.map(i => (
+						<li key={String(i.id)}>
+							<img src={i.user.avatar_url} alt={i.user.login} />
+							<div>
+								<strong>
+									<a
+										href={i.html_url}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										{i.title}
+									</a>
+								</strong>
+								<p>{i.user.login}</p>
+							</div>
+						</li>
+					))}
+				</IssuesList>
+			</Container>
+		);
 	}
 }
