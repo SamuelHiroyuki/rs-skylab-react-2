@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { FaGithubAlt, FaPlus, FaSpinner, FaTimes } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
-import { getRepositoryByName } from '../../services/api/Repositories';
+import { getRepository } from '../../services/api/Repositories';
 
 import { Container, Form, SubmitButton, List } from './styles';
 
@@ -44,7 +45,7 @@ export default class Main extends Component {
 
 		const { newRepo, repositories } = this.state;
 
-		const response = await getRepositoryByName(newRepo);
+		const response = await getRepository(newRepo);
 
 		const data = {
 			name: response.data.full_name,
@@ -93,9 +94,10 @@ export default class Main extends Component {
 								/>
 								<span>{r.name}</span>
 							</div>
-							<a href="http://" target="_blank" rel="noopener noreferrer">
+
+							<Link to={`/repository/${encodeURIComponent(r.name)}`}>
 								Detalhes
-							</a>
+							</Link>
 						</li>
 					))}
 				</List>
