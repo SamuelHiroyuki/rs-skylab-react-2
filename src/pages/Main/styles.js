@@ -90,6 +90,16 @@ export const List = styled.ul`
 		justify-content: space-between;
 		align-items: center;
 
+		div {
+			display: flex;
+			align-items: center;
+
+			svg {
+				margin-right: 5px;
+				cursor: pointer;
+			}
+		}
+
 		& + li {
 			border-top: 1px solid #eee;
 		}
