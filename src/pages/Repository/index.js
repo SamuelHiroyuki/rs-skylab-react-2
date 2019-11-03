@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FaSpinner, FaChevronCircleLeft } from 'react-icons/fa';
+import {
+	FaSpinner,
+	FaChevronCircleLeft,
+	FaExclamationCircle,
+	FaCheck,
+} from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import {
@@ -9,7 +14,7 @@ import {
 } from '../../services/api/Repositories';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssuesList, Label } from './styles';
+import { Loading, Owner, IssuesList, Label, IssuesFilter } from './styles';
 
 export default class Repository extends Component {
 	static propTypes = {
@@ -24,6 +29,8 @@ export default class Repository extends Component {
 		repository: {},
 		issues: [],
 		loading: true,
+		issuesOpen: false,
+		issuesClosed: false,
 	};
 
 	async componentDidMount() {
@@ -34,7 +41,7 @@ export default class Repository extends Component {
 			getRepository(repoName),
 			getRepositoryIssues(repoName, {
 				params: {
-					state: 'open',
+					state: 'all',
 					per_page: 5,
 				},
 			}),
@@ -47,8 +54,50 @@ export default class Repository extends Component {
 		});
 	}
 
+	handleFilter = async type => {
+		if (type === 'open') {
+			await this.setState(prevState => ({ issuesOpen: !prevState.issuesOpen }));
+		}
+
+		if (type === 'closed') {
+			await this.setState(prevState => ({
+				issuesClosed: !prevState.issuesClosed,
+			}));
+		}
+
+		this.loadIssues();
+	};
+
+	loadIssues = async () => {
+		const { repository, issuesOpen, issuesClosed } = this.state;
+		let requestType = 'all';
+
+		if (issuesOpen !== issuesClosed) {
+			if (issuesOpen) {
+				requestType = 'open';
+			} else {
+				requestType = 'closed';
+			}
+		}
+
+		const issues = await getRepositoryIssues(repository.full_name, {
+			params: {
+				state: requestType,
+				per_page: 5,
+			},
+		});
+
+		this.setState({ issues: issues.data });
+	};
+
 	render() {
-		const { repository, issues, loading } = this.state;
+		const {
+			repository,
+			issues,
+			loading,
+			issuesOpen,
+			issuesClosed,
+		} = this.state;
 
 		if (loading) {
 			return (
@@ -71,6 +120,15 @@ export default class Repository extends Component {
 				</Owner>
 
 				<IssuesList>
+					<IssuesFilter open={issuesOpen} closed={issuesClosed}>
+						<button type="button" onClick={() => this.handleFilter('open')}>
+							<FaExclamationCircle size={18} /> Open
+						</button>
+						<button type="button" onClick={() => this.handleFilter('closed')}>
+							<FaCheck size={18} /> Closed
+						</button>
+					</IssuesFilter>
+
 					{issues.map(i => (
 						<li key={String(i.id)}>
 							<img src={i.user.avatar_url} alt={i.user.login} />

@@ -119,3 +119,34 @@ export const Label = styled.span`
 	margin-left: 5px;
 	background-color: #${({ color }) => color};
 `;
+
+export const IssuesFilter = styled.div`
+	display: flex;
+	justify-content: center;
+	margin-bottom: 30px;
+
+	button {
+		display: flex;
+		align-items: center;
+		background: none;
+		border: none;
+
+		${({ open }) => (open ? `color: #cb2431;` : `opacity: 0.2;`)}
+
+		svg {
+			margin-right: 5px;
+			${({ open }) => open && `color: #cb2431;`}
+		}
+
+		& + button {
+			opacity: ${({ closed }) => (closed ? 1 : 0.2)};
+			color: ${({ closed }) => (closed ? '#28a745' : '#000')};
+
+			svg {
+				opacity: ${({ closed }) => (closed ? 1 : 0.2)};
+				color: ${({ closed }) => (closed ? '#28a745' : '#000')};
+				margin-left: 15px;
+			}
+		}
+	}
+`;
