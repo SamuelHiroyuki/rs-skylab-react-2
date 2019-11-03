@@ -108,3 +108,14 @@ export const IssuesList = styled.ul`
 		}
 	}
 `;
+
+export const Label = styled.span`
+	color: #333;
+	border-radius: 2px;
+	font-size: 12px;
+	font-weight: 600;
+	height: 20px;
+	padding: 3px 4px;
+	margin-left: 5px;
+	background-color: #${({ color }) => color};
+`;

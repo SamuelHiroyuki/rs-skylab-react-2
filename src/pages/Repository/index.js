@@ -9,7 +9,7 @@ import {
 } from '../../services/api/Repositories';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssuesList } from './styles';
+import { Loading, Owner, IssuesList, Label } from './styles';
 
 export default class Repository extends Component {
 	static propTypes = {
@@ -48,7 +48,6 @@ export default class Repository extends Component {
 	}
 
 	render() {
-		const { match } = this.props;
 		const { repository, issues, loading } = this.state;
 
 		if (loading) {
@@ -84,6 +83,12 @@ export default class Repository extends Component {
 									>
 										{i.title}
 									</a>
+
+									{i.labels.map(label => (
+										<Label key={String(label.id)} color={label.color}>
+											{label.name}
+										</Label>
+									))}
 								</strong>
 								<p>{i.user.login}</p>
 							</div>
