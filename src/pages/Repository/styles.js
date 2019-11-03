@@ -150,3 +150,43 @@ export const IssuesFilter = styled.div`
 		}
 	}
 `;
+
+export const Pagination = styled.div`
+	display: flex;
+	justify-content: center;
+	margin-top: 30px;
+
+	button {
+		display: flex;
+		align-items: center;
+		background: none;
+		border: none;
+		margin: 0 10px;
+		${({ fixMargin }) => fixMargin && 'margin-right: 43px'}
+
+		&[disabled] {
+			cursor: not-allowed;
+			color: #eee;
+
+			svg {
+				color: #eee;
+			}
+		}
+
+		svg {
+			margin-right: 5px;
+		}
+	}
+
+	div {
+		display: flex;
+
+		button {
+			margin-right: 5px;
+
+			& + button {
+				margin: 0 0;
+			}
+		}
+	}
+`;

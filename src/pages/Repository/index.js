@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import {
 	FaSpinner,
 	FaChevronCircleLeft,
+	FaChevronLeft,
+	FaChevronRight,
 	FaExclamationCircle,
 	FaCheck,
+	FaAngleDoubleLeft,
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -14,7 +17,14 @@ import {
 } from '../../services/api/Repositories';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssuesList, Label, IssuesFilter } from './styles';
+import {
+	Loading,
+	Owner,
+	IssuesList,
+	Label,
+	IssuesFilter,
+	Pagination,
+} from './styles';
 
 export default class Repository extends Component {
 	static propTypes = {
@@ -31,10 +41,13 @@ export default class Repository extends Component {
 		loading: true,
 		issuesOpen: false,
 		issuesClosed: false,
+		page: 1,
+		disableGoButton: false,
 	};
 
 	async componentDidMount() {
 		const { match } = this.props;
+		const { page } = this.state;
 		const repoName = decodeURIComponent(match.params.repository);
 
 		const [repository, issues] = await Promise.all([
@@ -43,6 +56,7 @@ export default class Repository extends Component {
 				params: {
 					state: 'all',
 					per_page: 5,
+					page,
 				},
 			}),
 		]);
@@ -69,7 +83,7 @@ export default class Repository extends Component {
 	};
 
 	loadIssues = async () => {
-		const { repository, issuesOpen, issuesClosed } = this.state;
+		const { repository, issuesOpen, issuesClosed, page } = this.state;
 		let requestType = 'all';
 
 		if (issuesOpen !== issuesClosed) {
@@ -84,10 +98,32 @@ export default class Repository extends Component {
 			params: {
 				state: requestType,
 				per_page: 5,
+				page,
 			},
 		});
 
-		this.setState({ issues: issues.data });
+		if (issues.data.length === 0) {
+			this.setState({ disableGoButton: true, page: page - 1 });
+		} else {
+			this.setState({ issues: issues.data, disableGoButton: false });
+		}
+	};
+
+	handlePage = async type => {
+		const { page } = this.state;
+
+		let goTo = 1;
+
+		if (type !== 'start') {
+			goTo = type === 'back' ? page - 1 : page + 1;
+		}
+
+		await this.setState({
+			page: goTo,
+			disableGoButton: type !== 'go',
+		});
+
+		this.loadIssues();
 	};
 
 	render() {
@@ -97,6 +133,8 @@ export default class Repository extends Component {
 			loading,
 			issuesOpen,
 			issuesClosed,
+			page,
+			disableGoButton,
 		} = this.state;
 
 		if (loading) {
@@ -119,40 +157,70 @@ export default class Repository extends Component {
 					<p>{repository.description}</p>
 				</Owner>
 
-				<IssuesList>
-					<IssuesFilter open={issuesOpen} closed={issuesClosed}>
-						<button type="button" onClick={() => this.handleFilter('open')}>
-							<FaExclamationCircle size={18} /> Open
-						</button>
-						<button type="button" onClick={() => this.handleFilter('closed')}>
-							<FaCheck size={18} /> Closed
-						</button>
-					</IssuesFilter>
+				{issues.length > 0 && (
+					<IssuesList>
+						<IssuesFilter open={issuesOpen} closed={issuesClosed}>
+							<button type="button" onClick={() => this.handleFilter('open')}>
+								<FaExclamationCircle size={18} /> Open
+							</button>
+							<button type="button" onClick={() => this.handleFilter('closed')}>
+								<FaCheck size={18} /> Closed
+							</button>
+						</IssuesFilter>
 
-					{issues.map(i => (
-						<li key={String(i.id)}>
-							<img src={i.user.avatar_url} alt={i.user.login} />
+						{issues.map(i => (
+							<li key={String(i.id)}>
+								<img src={i.user.avatar_url} alt={i.user.login} />
+								<div>
+									<strong>
+										<a
+											href={i.html_url}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											{i.title}
+										</a>
+
+										{i.labels.map(label => (
+											<Label key={String(label.id)} color={label.color}>
+												{label.name}
+											</Label>
+										))}
+									</strong>
+									<p>{i.user.login}</p>
+								</div>
+							</li>
+						))}
+
+						<Pagination fixMargin={page > 1}>
 							<div>
-								<strong>
-									<a
-										href={i.html_url}
-										target="_blank"
-										rel="noopener noreferrer"
+								{page > 1 && (
+									<button
+										type="button"
+										onClick={() => this.handlePage('start')}
 									>
-										{i.title}
-									</a>
-
-									{i.labels.map(label => (
-										<Label key={String(label.id)} color={label.color}>
-											{label.name}
-										</Label>
-									))}
-								</strong>
-								<p>{i.user.login}</p>
+										<FaAngleDoubleLeft size={18} />
+									</button>
+								)}
+								<button
+									disabled={page === 1}
+									type="button"
+									onClick={() => this.handlePage('back')}
+								>
+									<FaChevronLeft size={18} />
+								</button>
 							</div>
-						</li>
-					))}
-				</IssuesList>
+							<span>Página: {page}</span>
+							<button
+								disabled={disableGoButton}
+								type="button"
+								onClick={() => this.handlePage('go')}
+							>
+								<FaChevronRight size={18} />
+							</button>
+						</Pagination>
+					</IssuesList>
+				)}
 			</Container>
 		);
 	}
